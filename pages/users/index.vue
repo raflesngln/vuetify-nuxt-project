@@ -15,7 +15,6 @@
               <nuxt-link :to="'/users/'+user.id">{{ user.name }}</nuxt-link>
             </li>
           </ul>
-
         </v-card-text>
       </v-card>
     </v-flex>
@@ -26,8 +25,8 @@
 import axios from 'axios'
 export default {
   async asyncData () {
-    const { data } = await axios.get('https://jsonplaceholder.typicode.com/users')
-    // const { data } = await axios.get('http://localhost:8000/api/v1/companies')
+    // const { data } = await axios.get('https://jsonplaceholder.typicode.com/users')
+    const { data } = await axios.get('http://localhost:8000/api/v1/companies')
     return { users: data }
   }
 }

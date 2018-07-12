@@ -22,7 +22,7 @@ module.exports = {
   /*
   ** Customize the progress bar color
   */
-  loading: { color: '#17e617' },
+  loading: { color: '#f00988',height: '8px' },
   /*
   ** Build configuration
   */

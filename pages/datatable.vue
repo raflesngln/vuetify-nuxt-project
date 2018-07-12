@@ -2,9 +2,10 @@
     <div>
     <h1> <v-icon color="purple darken-1">dialpad</v-icon> List Users</h1>
     <v-card>
-      <v-dialog v-model="dialog" max-width="500px">
+      <v-dialog v-model="dialog" width="600px" max-width="700px">
         <v-btn color="primary" dark slot="activator" class="mb-2">New Item</v-btn>
         <v-card>
+          <form onsubmit="event.preventDefault()" method="POST" @submit="saveData(editedItem.id)" name="modalForm" ref="modalForm">
           <v-card-title>
             <span class="headline">{{ formTitle }}</span>
           </v-card-title>
@@ -12,30 +13,53 @@
             <v-container grid-list-md>
               <v-layout wrap>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field label="Dessert name" v-model="editedItem.name"></v-text-field>
+                  <v-text-field label=" Name" v-model="editedItem.name"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field label="Calories" v-model="editedItem.calories"></v-text-field>
+                  <v-text-field label="Address" v-model="editedItem.address"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field label="Fat (g)" v-model="editedItem.fat"></v-text-field>
+                  <v-text-field label="Website" v-model="editedItem.website"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field label="Carbs (g)" v-model="editedItem.carbs"></v-text-field>
+                  <v-text-field label="Email" v-model="editedItem.email"></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6 md4>
-                  <v-text-field label="Protein (g)" v-model="editedItem.protein"></v-text-field>
+                  <v-dialog
+                              ref="dialog"
+                              v-model="modal"
+                              :return-value.sync="date"
+                              persistent
+                              lazy
+                              full-width
+                              width="300px"
+                            >
+                              <v-text-field
+                                slot="activator"
+                                v-model="editedItem.created_at"
+                                label="Date Created"
+                                prepend-icon="event"
+                                readonly
+                              ></v-text-field>
+                              <v-date-picker v-model="date" scrollable>
+                                <v-spacer></v-spacer>
+                                <v-btn flat color="primary" @click="modal = false">Cancel</v-btn>
+                                <v-btn flat color="primary" @click="$refs.dialog.save(date)">OK</v-btn>
+                              </v-date-picker>
+                    </v-dialog>
                 </v-flex>
               </v-layout>
             </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" flat @click.native="close">Cancel</v-btn>
-            <v-btn color="blue darken-1" flat @click.native="save">Save</v-btn>
+            <v-btn color="error" flat @click.native="close">Cancel</v-btn>
+            <v-btn color="success" flat type="submit" >{{actionforChange}}</v-btn>
           </v-card-actions>
+          </form>
         </v-card>
       </v-dialog>
+      <!-- TABLE -->
       <v-data-table
         :headers="headers"
         :items="items"
@@ -47,10 +71,10 @@
       >
         <template slot="items" slot-scope="props">
           <td>{{ props.item.name }}</td>
-          <td class="text-xs-right">{{ props.item.calories }}</td>
-          <td class="text-xs-right">{{ props.item.fat }}</td>
-          <td class="text-xs-right">{{ props.item.carbs }}</td>
-          <td class="text-xs-right">{{ props.item.protein }}</td>
+          <td class="text-xs-left">{{ props.item.address }}</td>
+          <td class="text-xs-left">{{ props.item.website }}</td>
+          <td class="text-xs-left">{{ props.item.email }}</td>
+          <td class="text-xs-right">{{ props.item.created_at }}</td>
           <td class="justify-center layout px-0">
             <v-btn icon class="mx-0" @click="editItem(props.item)">
               <v-icon color="teal">edit</v-icon>
@@ -61,31 +85,25 @@
           </td>
         </template>
         <template slot="no-data">
-          <v-btn color="primary" @click="initialize">Reset</v-btn>
+          <v-btn color="primary" @click="getData">Reset</v-btn>
         </template>
       </v-data-table>
+      <!-- END OF TABLE -->
       </v-card>
+
     </div>
 </template>
 
 <script>
 import axios from 'axios'
-import * as VDataTable from 'vuetify/es5/components/VDataTable'
-import * as Valert from 'vuetify/es5/components/Valert'
-import * as Vdialog from 'vuetify/es5/components/Vdialog'
 
 export default {
-  async asyncData () {
-    const { data } = await axios.get('https://jsonplaceholder.typicode.com/users')
-    // const { data } = await axios.get('http://localhost:8000/api/v1/companies')
-    return { users: data }
-  },
-  components: {
-    ...Valert,
-    ...VDataTable,
-    ...Vdialog
-  },
   data: () => ({
+    date: null,
+    menu: false,
+    modal: false,
+    menu2: false,
+
     dialog: false,
     search: '',
     totalItems: 0,
@@ -95,36 +113,39 @@ export default {
     editedIndex: -1,
     headers: [
       {
-        text: 'Dessert (100g serving)',
+        text: 'Name',
         align: 'left',
-        sortable: false,
+        sortable: true,
         value: 'name'
       },
-      { text: 'Calories', value: 'calories' },
-      { text: 'Fat (g)', value: 'fat' },
-      { text: 'Carbs (g)', value: 'carbs' },
-      { text: 'Protein (g)', value: 'protein' },
+      { text: 'Address', value: 'address' },
+      { text: 'Website', value: 'website' },
+      { text: 'Email', value: 'email', sortable: false },
+      { text: 'created_at', value: 'created_at' },
       { text: 'Actions', value: 'name', sortable: false }
     ],
     editedItem: {
       name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0
+      address: 0,
+      website: 0,
+      email: 0,
+      created_at: 0
     },
     defaultItem: {
       name: '',
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0
+      address: 0,
+      website: 0,
+      email: 0,
+      created_at: 0
     }
   }),
 
   computed: {
     formTitle () {
-      return this.editedIndex === -1 ? 'New Itemss' : 'Edit Item'
+      return this.editedIndex === -1 ? 'New Items' : 'Edit Item'
+    },
+    actionforChange () {
+      return this.editedIndex === -1 ? 'Save Data' : 'Update Data'
     }
   },
 
@@ -134,64 +155,21 @@ export default {
     }
   },
   created () {
-    this.initialize()
+    this.getData()
   },
   methods: {
-    initialize () {
+    getData () {
       this.loading = false
-      this.items = [
-        {
-          name: 'Frozen Yogurt',
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0
-        },
-        {
-          name: 'Ice cream sandwich',
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3
-        },
-        {
-          name: 'Eclair',
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0
-        },
-        {
-          name: 'Cupcake',
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3
-        },
-        {
-          name: 'Gingerbread',
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9
-        },
-        {
-          name: 'Jelly bean',
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0
-        },
-        {
-          name: 'Lollipop',
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0
-        }
-      ]
+      let self = this
+      axios.get('http://localhost:8000/api/v1/companies')
+        .then(function (response) {
+          self.items = response.data
+          console.log(response.data)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     },
-
     editItem (item) {
       this.editedIndex = this.items.indexOf(item)
       this.editedItem = Object.assign({}, item)
@@ -211,14 +189,45 @@ export default {
       }, 300)
     },
 
-    save () {
+    saveData (item) {
+      this.loading = true
+      let id = item
+      const dataPost = {}
+      dataPost['name'] = this.editedItem.name
+      dataPost['address'] = this.editedItem.address
+      dataPost['website'] = this.editedItem.website
+      dataPost['email'] = this.editedItem.email
+      dataPost['created_at'] = '2018-03-09 11:17:33'
+      dataPost['updated_at'] = '2018-03-28 01:34:11'
+
       if (this.editedIndex > -1) {
-        Object.assign(this.items[this.editedIndex], this.editedItem)
+        // Object.assign(this.items[this.editedIndex], this.editedItem)
+        // alert('Update Data in database')
+        axios.put('http://localhost:8000/api/v1/companies/' + id, dataPost)
+          .then(response => {
+            this.getData()
+            console.log(response)
+            return response
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       } else {
-        this.items.push(this.editedItem)
+        // this.items.push(this.editedItem)
+        // alert('Adding Data to database')
+        axios.post('http://localhost:8000/api/v1/companies', dataPost)
+          .then(response => {
+            this.getData()
+            console.log(response.data)
+            return response
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       }
       this.close()
     }
   }
+
 }
 </script>

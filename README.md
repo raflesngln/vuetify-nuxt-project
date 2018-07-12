@@ -2,6 +2,8 @@
 
 > Nuxt.js + Vuetify.js project
 
+<img src="https://raw.githubusercontent.com/raflesngln/vuetify-nuxt-project/master/Capture.JPG" alt="My cool logo"/>
+
 ## Build Setup
 
 ``` bash
