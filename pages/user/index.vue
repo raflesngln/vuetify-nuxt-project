@@ -283,7 +283,6 @@ export default {
       dataPost['updated_at'] = '2018-03-28 01:34:11'
 
       if (this.editedIndex > -1) {
-        // Object.assign(this.items[this.editedIndex], this.editedItem)
         // alert('Update Data in database')
         axios.put('http://localhost:8000/api/v1/companies/' + id, dataPost)
           .then(response => {
@@ -296,7 +295,6 @@ export default {
             console.log(error)
           })
       } else {
-        // this.items.push(this.editedItem)
         // alert('Adding Data to database')
         axios.post('http://localhost:8000/api/v1/companies', dataPost)
           .then(response => {

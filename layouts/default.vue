@@ -20,7 +20,7 @@
         </v-list>
         <!-- avatar -->
 
-<!-- MENU -->
+<!-- SIDE MENU -->
       <v-list>
         <v-list-tile
           router
@@ -259,7 +259,7 @@
   /* padding: 64px 0px 30px 230px !important; */
 }
 .v-container{
-  background: #f00988 !important;
+  background: #09f028 !important;
 
 }
 
